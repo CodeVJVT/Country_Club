@@ -10,6 +10,7 @@ import cv2
 import numpy as np
 import re
 
+# Configuración de Tesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 
@@ -49,14 +50,17 @@ class PDFViewerApp:
         self.zoom_scale = 1.0
         self.rotation_angle = 0
 
+        # Botón para seleccionar el PDF
         self.select_button = tk.Button(
             root, text="Seleccionar PDF", command=self.select_and_load_pdf
         )
         self.select_button.pack(pady=10)
 
+        # Canvas para mostrar la imagen
         self.canvas = tk.Canvas(root, width=300, height=400)
         self.canvas.pack(pady=10)
 
+        # Navegación entre páginas
         nav_frame = tk.Frame(root)
         self.prev_button = tk.Button(
             nav_frame, text="<< Página Anterior", command=self.prev_page
@@ -68,9 +72,11 @@ class PDFViewerApp:
         self.next_button.pack(side=tk.LEFT, padx=5)
         nav_frame.pack()
 
+        # Etiqueta para mostrar la página actual
         self.page_label = tk.Label(root, text="Página: 0 / 0")
         self.page_label.pack(pady=5)
 
+        # Controles de zoom y rotación
         zoom_frame = tk.Frame(root)
         self.zoom_in_button = tk.Button(zoom_frame, text="Zoom +", command=self.zoom_in)
         self.zoom_out_button = tk.Button(
@@ -85,11 +91,13 @@ class PDFViewerApp:
         self.rotate_button.pack(side=tk.LEFT, padx=5)
         zoom_frame.pack(pady=5)
 
+        # Área de texto para mostrar el texto extraído y clasificado
         self.text_box = scrolledtext.ScrolledText(
             root, wrap=tk.WORD, width=80, height=20
         )
         self.text_box.pack(padx=10, pady=10)
 
+        # Botones para guardar resultados
         self.save_button = tk.Button(
             root, text="Guardar Resultados", command=self.save_results
         )
@@ -101,6 +109,7 @@ class PDFViewerApp:
         self.save_all_button.pack(pady=5)
 
     def select_and_load_pdf(self):
+        """Selecciona y carga el archivo PDF."""
         file_path = filedialog.askopenfilename(
             title="Seleccione un archivo PDF", filetypes=[("Archivos PDF", "*.pdf")]
         )
@@ -112,6 +121,7 @@ class PDFViewerApp:
             self.display_page()
 
     def display_page(self):
+        """Muestra la página actual del PDF."""
         if self.pdf_document:
             page = self.pdf_document[self.current_page]
             pix = page.get_pixmap()
@@ -123,6 +133,7 @@ class PDFViewerApp:
             text = clean_extracted_text(text)
             category = classify_document(text)
 
+            # Mostrar el texto y la categoría en el área de texto
             self.text_box.delete(1.0, tk.END)
             self.text_box.insert(tk.END, f"--- Página {self.current_page + 1} ---\n")
             self.text_box.insert(tk.END, f"Categoría: {category}\n")
@@ -155,6 +166,7 @@ class PDFViewerApp:
             print("No se ha cargado ningún PDF.")
 
     def show_preview(self, image):
+        """Muestra una vista previa de la imagen en el canvas."""
         img_rotated = image.rotate(self.rotation_angle, expand=True)
         img_resized = img_rotated.resize(
             (int(300 * self.zoom_scale), int(400 * self.zoom_scale))
@@ -164,29 +176,35 @@ class PDFViewerApp:
         self.canvas.image = img_tk
 
     def next_page(self):
+        """Muestra la siguiente página del PDF."""
         if self.pdf_document and self.current_page < len(self.pdf_document) - 1:
             self.current_page += 1
             self.display_page()
 
     def prev_page(self):
+        """Muestra la página anterior del PDF."""
         if self.pdf_document and self.current_page > 0:
             self.current_page -= 1
             self.display_page()
 
     def zoom_in(self):
+        """Aumenta el zoom."""
         self.zoom_scale += 0.1
         self.display_page()
 
     def zoom_out(self):
+        """Disminuye el zoom."""
         if self.zoom_scale > 0.1:
             self.zoom_scale -= 0.1
             self.display_page()
 
     def rotate_image(self):
+        """Rota la imagen de la página."""
         self.rotation_angle = (self.rotation_angle + 90) % 360
         self.display_page()
 
     def save_results(self):
+        """Guarda los resultados en un archivo de texto."""
         file_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
             filetypes=[("Archivo de texto", "*.txt")],
@@ -198,6 +216,7 @@ class PDFViewerApp:
             print(f"Resultados guardados en: {file_path}")
 
 
+# Iniciar la aplicación
 root = tk.Tk()
 app = PDFViewerApp(root)
 root.mainloop()

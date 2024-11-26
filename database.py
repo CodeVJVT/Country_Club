@@ -37,3 +37,15 @@ def query_by_category(category):
     results = cursor.fetchall()
     conn.close()
     return results
+
+
+def save_page_data(pagina, categoria, texto):
+    """Guarda los datos de una página en la base de datos."""
+    conn = sqlite3.connect("document_data.db")
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO documentos (pagina, categoria, texto) VALUES (?, ?, ?)",
+        (pagina, categoria, texto),
+    )
+    conn.commit()
+    conn.close()
